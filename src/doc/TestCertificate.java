@@ -29,11 +29,6 @@ public class TestCertificate extends Certificate {
     }
 
     @Override
-    public void shred() {
-        LOGGER.info("bzzzzzz. The document is gone");
-    }
-
-    @Override
     public String toString() {
         return this.subject + " " + this.getCertScore();
     }
