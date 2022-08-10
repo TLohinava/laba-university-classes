@@ -20,7 +20,7 @@ public class TestCertificate extends Certificate {
     }
 
     public static int calcCertScore() {
-        return Math.toIntExact(Math.round(Math.random() * 100 + 1));
+        return Math.toIntExact(Math.round(Math.random() * 100));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class TestCertificate extends Certificate {
         return subject;
     }
 
-    public void setSubject() {
+    public void setSubject(String subject) {
         this.subject = subject;
     }
 }

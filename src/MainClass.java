@@ -102,6 +102,13 @@ public class MainClass {
             LOGGER.info("New logbook created");
         }
 
+        PassbookEntry<Integer> alexPassbookHistory = new PassbookEntry<>("History", 9);
+        PassbookEntry<String> alexPassbookPhilosophy = new PassbookEntry<>("Philosophy", "passed");
+
+        Inventory inventory = new Inventory();
+        inventory.<TestCertificate>printInventoryList(alexTestCerts);
+        inventory.<Faculty>printInventoryList(bsmuFaculties);
+
         UniUtils.chooseFaculty(pediatrics, alexApplication, alexTotalScore);
         UniUtils.getCheapest(bsmu);
         UniUtils.welcome(employeesGM);

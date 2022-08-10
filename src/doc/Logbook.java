@@ -5,14 +5,14 @@ import people.Student;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Logbook implements AutoCloseable {
+public class Logbook<T> implements AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(Logbook.class);
 
     private Student student;
-    int idNumber;
+    T idNumber;
 
-    public Logbook(Student student, int idNumber) {
+    public Logbook(Student student, T idNumber) {
         this.student = student;
         this.idNumber = idNumber;
     }
@@ -30,11 +30,11 @@ public class Logbook implements AutoCloseable {
         this.student = student;
     }
 
-    public int getIdNumber() {
+    public T getIdNumber() {
         return idNumber;
     }
 
-    public void setIdNumber(int idNumber) {
+    public void setIdNumber(T idNumber) {
         this.idNumber = idNumber;
     }
 }

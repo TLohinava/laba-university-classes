@@ -37,7 +37,7 @@ public abstract class Person implements IWrite {
         return firstName;
     }
 
-    public void setFirstName() {
+    public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
@@ -45,7 +45,7 @@ public abstract class Person implements IWrite {
         return surname;
     }
 
-    public void setSurname() {
+    public void setSurname(String surname) {
         this.surname = surname;
     }
 
@@ -53,7 +53,7 @@ public abstract class Person implements IWrite {
         return gender;
     }
 
-    public void setGender() {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 }
