@@ -13,6 +13,11 @@ public class PassbookEntry<T> {
         this.mark = mark;
     }
 
+    @Override
+    public String toString() {
+        return this.subject + ": " + this.mark;
+    }
+
     public Student getStudent() {
         return student;
     }

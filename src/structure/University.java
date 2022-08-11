@@ -2,11 +2,13 @@ package structure;
 
 import exception.CountException;
 
+import java.util.*;
+
 public class University extends Building {
 
     private String uniName;
     private int dateOfEstablishment;
-    private Faculty[] faculties;
+    private List<Faculty> faculties;
 
     public University(String uniName, int dateOfEstablishment) {
         this.uniName = uniName;
@@ -34,12 +36,12 @@ public class University extends Building {
         this.dateOfEstablishment = dateOfEstablishment;
     }
 
-    public Faculty[] getFaculty() {
+    public List<Faculty> getFaculty() {
         return faculties;
     }
 
-    public void setFaculty(Faculty[] faculties) {
-        if (faculties.length <= 1) {
+    public void setFaculty(List<Faculty> faculties) {
+        if (faculties.size() <= 1) {
             throw new CountException("Number of faculties is invalid");
         }
         this.faculties = faculties;

@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.*;
 
 public class UniUtils {
 
@@ -39,7 +40,7 @@ public class UniUtils {
         }
     }
 
-    public static void welcome(Employee[] employees) {
+    public static void welcome(List<Employee> employees) {
         for (Employee emp : employees) {
             emp.greet();
         }

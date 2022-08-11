@@ -8,42 +8,55 @@ import people.Student;
 import exception.DataInvalidException;
 
 import java.math.BigDecimal;
+import java.util.*;
 
 public class Faculty implements IAdmit {
 
     private String facultyName;
-    private Student[] students;
+    private List<Student> students;
+    private int maxNumberOfStudents;
     private int year;
     private Dean dean;
-    private Employee[] employees;
+    private List<Employee> employees;
     private int minScore;
     private BigDecimal cost;
+    private int studentsCapacity;
 
     private static final Logger LOGGER = LogManager.getLogger(Faculty.class);
 
-    public Faculty(String facultyName) {
+    public Faculty(String facultyName, int studentsCapacity) {
         this.facultyName = facultyName;
+        this.studentsCapacity = studentsCapacity;
+        this.students = new ArrayList<>(studentsCapacity);
     }
 
     public void introduceFaculty() {
         LOGGER.info("Welcome to the faculty of " + getFacultyName() + ". Our year of establishment is " +
                 getYear() + ". Our is dean is called " + dean.getTitle(dean.getGender()) + dean.getFullName() + ". There are " +
-                getStudents().length + " students studying at our faculty.");
+                getStudentsCapacity() + " students studying at our faculty.");
     }
 
     @Override
     public void admitStudents(Student student) {
-        for (int i = 0; i < students.length; i++) {
-            if (students[i] == null) {
-                students[i] = student;
-                break;
-            }
+        if (students.size() < getStudentsCapacity()) {
+            students.add(student);
+        } else {
+            LOGGER.info("Unfortunately, we've reached the limit of students this year.");
         }
+        LOGGER.info(students);
     }
 
     @Override
     public String toString() {
         return this.facultyName;
+    }
+
+    public int getMaxNumberOfStudents() {
+        return maxNumberOfStudents;
+    }
+
+    public void setMaxNumberOfStudents(int maxNumberOfStudents) {
+        this.maxNumberOfStudents = maxNumberOfStudents;
     }
 
     public String getFacultyName() {
@@ -54,19 +67,19 @@ public class Faculty implements IAdmit {
         this.facultyName = facultyName;
     }
 
-    public Student[] getStudents() {
+    public List<Student> getStudents() {
         return students;
     }
 
-    public void setStudents(Student[] students) {
+    public void setStudents(List<Student> students) {
         this.students = students;
     }
 
-    public Employee[] getEmployees() {
+    public List<Employee> getEmployees() {
         return employees;
     }
 
-    public void setEmployees(Employee[] employees) {
+    public void setEmployees(List<Employee> employees) {
         this.employees = employees;
     }
 
@@ -103,6 +116,14 @@ public class Faculty implements IAdmit {
 
     public void setCost(BigDecimal cost) {
         this.cost = cost;
+    }
+
+    public int getStudentsCapacity() {
+        return studentsCapacity;
+    }
+
+    public void setStudentsCapacity(int studentsCapacity) {
+        this.studentsCapacity = studentsCapacity;
     }
 }
 

@@ -9,7 +9,7 @@ public abstract class Certificate implements IShred {
     private Student student;
     private int certScore;
 
-    private static final Logger LOGGER = LogManager.getLogger(TestCertificate.class);
+    private static final Logger LOGGER = LogManager.getLogger(Certificate.class);
 
     public Certificate(int certScore) {
         this.certScore = certScore;
@@ -30,7 +30,7 @@ public abstract class Certificate implements IShred {
         this.student = student;
     }
 
-    public int getCertScore() {
+    public Integer getCertScore() {
         return certScore;
     }
 

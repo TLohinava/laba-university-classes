@@ -5,16 +5,21 @@ import people.Student;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Logbook<T> implements AutoCloseable {
 
     private static final Logger LOGGER = LogManager.getLogger(Logbook.class);
 
     private Student student;
-    T idNumber;
+    private T idNumber;
+    private List<PassbookEntry<T>> passbook;
 
     public Logbook(Student student, T idNumber) {
         this.student = student;
         this.idNumber = idNumber;
+        this.passbook = new ArrayList<>();
     }
 
     @Override
@@ -36,5 +41,13 @@ public class Logbook<T> implements AutoCloseable {
 
     public void setIdNumber(T idNumber) {
         this.idNumber = idNumber;
+    }
+
+    public List<PassbookEntry<T>> getPassbook() {
+        return passbook;
+    }
+
+    public void setPassbook(List<PassbookEntry<T>> passbook) {
+        this.passbook = passbook;
     }
 }
