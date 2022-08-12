@@ -17,11 +17,6 @@ public class SchoolCert extends Certificate {
     }
 
     @Override
-    public void shred() {
-        LOGGER.info("bzzzzzz. The document is gone");
-    }
-
-    @Override
     public String toString() {
         return "School certificate score is " + this.getCertScore();
     }

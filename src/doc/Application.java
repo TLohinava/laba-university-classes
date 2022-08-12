@@ -6,7 +6,7 @@ import people.staff.Rector;
 import structure.*;
 
 import java.time.*;
-import java.util.Objects;
+import java.util.*;
 
 public class Application {
 
@@ -14,7 +14,7 @@ public class Application {
     private Rector rector;
     private Faculty faculty;
     private University university;
-    private TestCertificate[] testCertificates;
+    private List<TestCertificate> testCertificates;
     private SchoolCert schoolCert;
     private LocalDateTime applicationDateTime;
 
@@ -23,13 +23,13 @@ public class Application {
         this.applicationDateTime = applicationDateTime;
     }
 
-    public int getTotalScore(TestCertificate[] testCertificates, SchoolCert schoolCert) {
+    public int getTotalScore(List<TestCertificate> testCertificates, SchoolCert schoolCert) {
         for (TestCertificate cert : testCertificates) {
             if (cert.getDateOfIssue().getYear() < LocalDate.now().getYear()) {
                 throw new DateException("Year is not valid");
             }
         }
-        return testCertificates[0].getCertScore() + testCertificates[1].getCertScore() + testCertificates[2].getCertScore() + schoolCert.getCertScore();
+        return testCertificates.get(0).getCertScore() + testCertificates.get(1).getCertScore() + testCertificates.get(2).getCertScore() + schoolCert.getCertScore();
     }
 
     @Override
@@ -87,14 +87,6 @@ public class Application {
         this.university = university;
     }
 
-    public TestCertificate[] getTestCertificate() {
-        return testCertificates;
-    }
-
-    public void setTestCertificate(TestCertificate[] testCertificate) {
-        this.testCertificates = testCertificate;
-    }
-
     public SchoolCert getSchoolCert() {
         return schoolCert;
     }
@@ -109,5 +101,13 @@ public class Application {
 
     public void setApplicationDateTime(LocalDateTime applicationDateTime) {
         this.applicationDateTime = applicationDateTime;
+    }
+
+    public List<TestCertificate> getTestCertificates() {
+        return testCertificates;
+    }
+
+    public void setTestCertificates(List<TestCertificate> testCertificates) {
+        this.testCertificates = testCertificates;
     }
 }

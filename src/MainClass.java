@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.time.*;
+import java.util.*;
 
 public class MainClass {
 
@@ -27,38 +28,40 @@ public class MainClass {
         Dean deanDent = new Dean("Mikhail", "Mikhailov", "M");
         Dean deanPharm = new Dean("Zukhara", "Karimova", "F");
 
-        Employee[] employeesGM = {
-                deanGM,
-                new Professor("Andrey", "Andreevich", "M"),
-                new Professor("Anna", "Annova", "F")};
+        List<Employee> employeesGM = new ArrayList<>();
+        employeesGM.add(deanGM);
+        employeesGM.add(new Professor("Andrey", "Andreevich", "M"));
+        employeesGM.add(new Professor("Anna", "Annova", "F"));
 
         Student alex = new Student("Alex", "May", "M");
+        Student rita = new Student("Rita", "Avdeeva", "F");
+        Student ira = new Student("Irina", "Udina", "F");
+        Student dima = new Student("Dmitry", "Udin", "M");
         alex.setPassedTest(true);
+        rita.setPassedTest(true);
+        ira.setPassedTest(true);
+        dima.setPassedTest(true);
 
         Secretary secretary = new Secretary("Alisa", "Alisovna", "F");
-        secretary.work(employeesGM[1]);
+        secretary.work(employeesGM.get(1));
 
         University bsmu = new University("Belarusian State Medical University", LocalDate.of(1921, 1, 1).getYear());
         int dateOfEst = bsmu.getDateOfEstablishment();
 
-        Faculty generalMedicine = new Faculty("General Medicine");
+        Faculty generalMedicine = new Faculty("General Medicine", 1000);
         generalMedicine.setDean(deanGM);
-        generalMedicine.setStudents(new Student[1200]);
         generalMedicine.setCost(new BigDecimal(3000));
         generalMedicine.setYear(dateOfEst);
-        Faculty pediatrics = new Faculty("Pediatrics");
+        Faculty pediatrics = new Faculty("Pediatrics", 3);
         pediatrics.setDean(deanPed);
-        pediatrics.setStudents(new Student[200]);
         pediatrics.setCost(new BigDecimal(3000));
         pediatrics.setYear(dateOfEst);
-        Faculty dentistry = new Faculty("Dentistry");
+        Faculty dentistry = new Faculty("Dentistry", 50);
         dentistry.setDean(deanDent);
-        dentistry.setStudents(new Student[100]);
         dentistry.setCost(new BigDecimal(4000));
         dentistry.setYear(1931);
-        Faculty pharmacology = new Faculty("Pharmacology");
+        Faculty pharmacology = new Faculty("Pharmacology", 100);
         pharmacology.setDean(deanPharm);
-        pharmacology.setStudents(new Student[50]);
         pharmacology.setCost(new BigDecimal(5000));
         pharmacology.setYear(2011);
 
@@ -73,7 +76,11 @@ public class MainClass {
             LOGGER.info("Minimum score setting is finished");
         }
 
-        Faculty[] bsmuFaculties = {generalMedicine, pediatrics, dentistry, pharmacology};
+        List<Faculty> bsmuFaculties = new ArrayList<>();
+        bsmuFaculties.add(generalMedicine);
+        bsmuFaculties.add(pediatrics);
+        bsmuFaculties.add(dentistry);
+        bsmuFaculties.add(pharmacology);
         bsmu.setFaculty(bsmuFaculties);
 
         Address alexAddress = new Address("Belarus", "Minsk");
@@ -91,18 +98,36 @@ public class MainClass {
         TestCertificate alexCertChem = new TestCertificate(LocalDate.of(2022, 6, 20),
                 TestCertificate.calcCertScore(),
                 "Chemistry");
-        TestCertificate[] alexTestCerts = {alexCertBio, alexCertBel, alexCertChem};
+        List<TestCertificate> alexTestCerts = new ArrayList<>();
+        alexTestCerts.add(alexCertBio);
+        alexTestCerts.add(alexCertBel);
+        alexTestCerts.add(alexCertChem);
 
         SchoolCert alexSchoolCert = new SchoolCert(82);
 
         Application alexApplication = new Application(alex, LocalDateTime.of(2022, 7, 15, 14, 22));
+        Application ritaApplication = new Application(rita, LocalDateTime.of(2022, 7, 15, 14, 22));
+        Application iraApplication = new Application(ira, LocalDateTime.of(2022, 7, 15, 14, 22));
+        Application dimaApplication = new Application(dima, LocalDateTime.of(2022, 7, 15, 14, 22));
         int alexTotalScore = alexApplication.getTotalScore(alexTestCerts, alexSchoolCert);
 
-        try (Logbook alexLog = new Logbook(alex, 123)) {
-            LOGGER.info("New logbook created");
+        PassbookEntry<Integer> alexPassbookHistory = new PassbookEntry<>("History", 9);
+        PassbookEntry<String> alexPassbookPhilosophy = new PassbookEntry<>("Philosophy", "passed");
+
+        try (Logbook<Integer> alexLog = new Logbook<>(alex, 123)) {
+            List<PassbookEntry<?>> alexPassbook = new ArrayList<>();
+            alexPassbook.add(alexPassbookHistory);
+            alexPassbook.add(alexPassbookPhilosophy);
+            LOGGER.info(alexPassbook);
         }
 
+        Inventory.printInventoryList(alexTestCerts);
+        Inventory.printInventoryList(bsmu.getFaculty());
+
         UniUtils.chooseFaculty(pediatrics, alexApplication, alexTotalScore);
+        UniUtils.chooseFaculty(pediatrics, ritaApplication, 310);
+        UniUtils.chooseFaculty(pediatrics, iraApplication, 360);
+        UniUtils.chooseFaculty(pediatrics, dimaApplication, 356);
         UniUtils.getCheapest(bsmu);
         UniUtils.welcome(employeesGM);
         UniUtils.drinkBreak(deanGM);
