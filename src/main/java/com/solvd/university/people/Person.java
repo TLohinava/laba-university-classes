@@ -7,17 +7,21 @@ public abstract class Person implements IWrite {
 
     private String firstName;
     private String surname;
-    private String gender;
+    private Gender gender;
 
     private static final Logger LOGGER = LogManager.getLogger(Person.class);
 
-    public Person(String firstName, String surname, String gender) {
+    public Person(String firstName, String surname, Gender gender) {
         this.firstName = firstName;
         this.surname = surname;
         this.gender = gender;
     }
 
     public abstract void greet();
+
+    public enum Gender {
+        MALE, FEMALE, X
+    }
 
     @Override
     public void sign() {
@@ -49,11 +53,11 @@ public abstract class Person implements IWrite {
         this.surname = surname;
     }
 
-    public String getGender() {
+    public Gender getGender() {
         return gender;
     }
 
-    public void setGender(String gender) {
+    public void setGender(Gender gender) {
         this.gender = gender;
     }
 }

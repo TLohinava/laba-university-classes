@@ -2,8 +2,11 @@ package com.solvd.university.doc;
 
 import com.solvd.university.exception.DateException;
 import com.solvd.university.people.Student;
+import com.solvd.university.people.staff.Employee;
 import com.solvd.university.people.staff.Rector;
 import com.solvd.university.structure.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.*;
 import java.util.*;
@@ -17,10 +20,17 @@ public class Application {
     private List<TestCertificate> testCertificates;
     private SchoolCert schoolCert;
     private LocalDateTime applicationDateTime;
+    private ApplicationStatus status;
+
+    private static final Logger LOGGER = LogManager.getLogger(Employee.class);
 
     public Application(Student student, LocalDateTime applicationDateTime) {
         this.student = student;
         this.applicationDateTime = applicationDateTime;
+    }
+
+    public enum ApplicationStatus {
+        SUBMITTED, WAITING, PROCESSED, REVIEWED, LOST
     }
 
     public int getTotalScore(List<TestCertificate> testCertificates, SchoolCert schoolCert) {
@@ -109,5 +119,13 @@ public class Application {
 
     public void setTestCertificates(List<TestCertificate> testCertificates) {
         this.testCertificates = testCertificates;
+    }
+
+    public ApplicationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ApplicationStatus status) {
+        this.status = status;
     }
 }

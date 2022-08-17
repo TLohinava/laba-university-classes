@@ -7,7 +7,7 @@ public class Dean extends Professor {
 
     private static final Logger LOGGER = LogManager.getLogger(Dean.class);
 
-    public Dean(String firstName, String surname, String gender) {
+    public Dean(String firstName, String surname, Gender gender) {
         super(firstName, surname, gender);
     }
 

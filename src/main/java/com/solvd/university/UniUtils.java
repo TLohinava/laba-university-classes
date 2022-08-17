@@ -49,9 +49,9 @@ public class UniUtils {
     }
 
     public static void drinkBreak(Employee employee) {
-        employee.think();
+        employee.think(employee.getDrinkPreference());
         employee.boilWater();
-        employee.brew();
+        employee.brew(employee.getDrinkPreference());
         employee.sip();
     }
 
@@ -67,6 +67,27 @@ public class UniUtils {
             } else {
                 employee.sign();
             }
+        }
+    }
+
+    public static void checkStatus(Application application) {
+        switch (application.getStatus()) {
+            case SUBMITTED:
+                LOGGER.info("Your application has been submitted, thank you.");
+                break;
+            case WAITING:
+                LOGGER.info("Your application is still in the waiting line.");
+                break;
+            case PROCESSED:
+                LOGGER.info("Your application is being processed.");
+                break;
+            case REVIEWED:
+                LOGGER.info("We have reviewed your application.");
+                break;
+            case LOST:
+            default:
+                LOGGER.info("We've lost your application. Sorry!");
+                break;
         }
     }
 }

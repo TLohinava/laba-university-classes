@@ -13,7 +13,7 @@ public class Student extends Person {
 
     private static final Logger LOGGER = LogManager.getLogger(Student.class);
 
-    public Student(String firstName, String surname, String gender) {
+    public Student(String firstName, String surname, Gender gender) {
         super(firstName, surname, gender);
     }
 

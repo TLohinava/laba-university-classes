@@ -8,7 +8,7 @@ public class Secretary extends Employee {
 
     private static final Logger LOGGER = LogManager.getLogger(Secretary.class);
 
-    public Secretary(String firstName, String surname, String gender) {
+    public Secretary(String firstName, String surname, Gender gender) {
         super(firstName, surname, gender);
     }
 
