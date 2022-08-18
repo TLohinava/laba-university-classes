@@ -7,9 +7,13 @@ import com.solvd.university.structure.*;
 import com.solvd.university.people.Student;
 import com.solvd.university.exception.DataInvalidException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
@@ -144,5 +148,28 @@ public class MainClass {
         UniUtils.welcome(employeesGM);
         UniUtils.drinkBreak(deanGM);
         UniUtils.checkSchedule(secretary, LocalTime.of(12, 30));
+
+        try {
+            File text = new File("src/main/resources/textSample.txt");
+            String content = FileUtils.readFileToString(text, "UTF-8");
+            content = StringUtils.lowerCase(content);
+            String[] contentArray = StringUtils.split(content);
+            Map<String, Integer> wordsMap = new HashMap<>();
+            for (String word : contentArray) {
+                if (word.length() > 3 && StringUtils.isAlpha(word)) {
+                    if (wordsMap.containsKey(word)) continue;
+                    int num = StringUtils.countMatches(content, word);
+                    wordsMap.put(word, num);
+                }
+            }
+            Map<String, Integer> wordsSortedMap = new LinkedHashMap<>();
+            wordsMap.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .forEachOrdered(x -> wordsSortedMap.put(x.getKey(), x.getValue()));
+            LOGGER.info(wordsSortedMap);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 }
