@@ -1,14 +1,19 @@
 package com.solvd.university;
 
 import com.solvd.university.doc.*;
+import com.solvd.university.people.Person;
 import com.solvd.university.people.staff.*;
 import com.solvd.university.structure.*;
 import com.solvd.university.people.Student;
 import com.solvd.university.exception.DataInvalidException;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
@@ -18,29 +23,30 @@ public class MainClass {
     private static final Logger LOGGER = LogManager.getLogger(MainClass.class);
 
     public static void main(String[] args) {
-        Rector rector = new Rector("Alexey", "Mikhailov", "M");
+        Rector rector = new Rector("Alexey", "Mikhailov", Person.Gender.MALE);
         rector.setStart(LocalDate.of(2011, 5, 2));
 
-        Dean deanGM = new Dean("Ivan", "Ivanov", "M");
-        Dean deanPed = new Dean("Zinaida", "Zinaidovna", "F");
-        Dean deanDent = new Dean("Mikhail", "Mikhailov", "M");
-        Dean deanPharm = new Dean("Zukhara", "Karimova", "F");
+        Dean deanGM = new Dean("Ivan", "Ivanov", Person.Gender.MALE);
+        Dean deanPed = new Dean("Zinaida", "Zinaidovna", Person.Gender.FEMALE);
+        Dean deanDent = new Dean("Mikhail", "Mikhailov", Person.Gender.MALE);
+        Dean deanPharm = new Dean("Zukhara", "Karimova", Person.Gender.FEMALE);
+        deanGM.setDrinkPreference(Drinks.COFFEE);
 
         List<Employee> employeesGM = new ArrayList<>();
         employeesGM.add(deanGM);
-        employeesGM.add(new Professor("Andrey", "Andreevich", "M"));
-        employeesGM.add(new Professor("Anna", "Annova", "F"));
+        employeesGM.add(new Professor("Andrey", "Andreevich", Person.Gender.MALE));
+        employeesGM.add(new Professor("Anna", "Annova", Person.Gender.FEMALE));
 
-        Student alex = new Student("Alex", "May", "M");
-        Student rita = new Student("Rita", "Avdeeva", "F");
-        Student ira = new Student("Irina", "Udina", "F");
-        Student dima = new Student("Dmitry", "Udin", "M");
+        Student alex = new Student("Alex", "May", Person.Gender.MALE);
+        Student rita = new Student("Rita", "Avdeeva", Person.Gender.FEMALE);
+        Student ira = new Student("Irina", "Udina", Person.Gender.FEMALE);
+        Student dima = new Student("Dmitry", "Udin", Person.Gender.MALE);
         alex.setPassedTest(true);
         rita.setPassedTest(true);
         ira.setPassedTest(true);
         dima.setPassedTest(true);
 
-        Secretary secretary = new Secretary("Alisa", "Alisovna", "F");
+        Secretary secretary = new Secretary("Alisa", "Alisovna", Person.Gender.FEMALE);
         secretary.work(employeesGM.get(1));
 
         University bsmu = new University("Belarusian State Medical University", LocalDate.of(1921, 1, 1).getYear());
@@ -108,6 +114,18 @@ public class MainClass {
         Application iraApplication = new Application(ira, LocalDateTime.of(2022, 7, 15, 14, 22));
         Application dimaApplication = new Application(dima, LocalDateTime.of(2022, 7, 15, 14, 22));
         int alexTotalScore = alexApplication.getTotalScore(alexTestCerts, alexSchoolCert);
+        alexApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
+        ritaApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
+        iraApplication.setStatus(Application.ApplicationStatus.PROCESSED);
+        dimaApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
+        UniUtils.checkStatus(alexApplication);
+        List<Application.ApplicationStatus> currentApplications = new ArrayList<>();
+        currentApplications.add(alexApplication.getStatus());
+        currentApplications.add(ritaApplication.getStatus());
+        currentApplications.add(iraApplication.getStatus());
+        currentApplications.add(dimaApplication.getStatus());
+        Set<Application.ApplicationStatus> statusSet = new HashSet<>(currentApplications);
+        LOGGER.info(statusSet);
 
         PassbookEntry<Integer> alexPassbookHistory = new PassbookEntry<>("History", 9);
         PassbookEntry<String> alexPassbookPhilosophy = new PassbookEntry<>("Philosophy", "passed");
@@ -130,5 +148,28 @@ public class MainClass {
         UniUtils.welcome(employeesGM);
         UniUtils.drinkBreak(deanGM);
         UniUtils.checkSchedule(secretary, LocalTime.of(12, 30));
+
+        try {
+            File text = new File("src/main/resources/textSample.txt");
+            String content = FileUtils.readFileToString(text, "UTF-8");
+            content = StringUtils.lowerCase(content);
+            String[] contentArray = StringUtils.split(content);
+            Map<String, Integer> wordsMap = new HashMap<>();
+            for (String word : contentArray) {
+                if (word.length() > 3 && StringUtils.isAlpha(word)) {
+                    if (wordsMap.containsKey(word)) continue;
+                    int num = StringUtils.countMatches(content, word);
+                    wordsMap.put(word, num);
+                }
+            }
+            Map<String, Integer> wordsSortedMap = new LinkedHashMap<>();
+            wordsMap.entrySet()
+                    .stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .forEachOrdered(x -> wordsSortedMap.put(x.getKey(), x.getValue()));
+            LOGGER.info(wordsSortedMap);
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage());
+        }
     }
 }

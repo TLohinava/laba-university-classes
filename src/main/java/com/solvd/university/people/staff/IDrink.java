@@ -2,11 +2,11 @@ package com.solvd.university.people.staff;
 
 public interface IDrink {
 
-    void think();
+    void think(Drinks drink);
 
     void boilWater();
 
-    void brew();
+    void brew(Drinks drink);
 
     void sip();
 

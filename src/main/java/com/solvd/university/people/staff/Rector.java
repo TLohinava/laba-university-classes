@@ -12,7 +12,7 @@ public class Rector extends Professor {
 
     private static final Logger LOGGER = LogManager.getLogger(Rector.class);
 
-    public Rector(String firstName, String surname, String gender) {
+    public Rector(String firstName, String surname, Gender gender) {
         super(firstName, surname, gender);
         this.present = LocalDate.now().getYear();
     }

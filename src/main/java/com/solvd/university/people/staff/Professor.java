@@ -7,7 +7,7 @@ public class Professor extends Employee implements IResearch {
 
     private static final Logger LOGGER = LogManager.getLogger(Professor.class);
 
-    public Professor(String firstName, String surname, String gender) {
+    public Professor(String firstName, String surname, Gender gender) {
         super(firstName, surname, gender);
     }
 
@@ -21,10 +21,10 @@ public class Professor extends Employee implements IResearch {
         LOGGER.info("I have to write a review for this paper.");
     }
 
-    public String getTitle(String gender) {
-        if (getGender() == "M") {
+    public String getTitle(Gender gender) {
+        if (getGender() == Gender.MALE) {
             return "Mr.";
-        } else if (getGender() == "F") {
+        } else if (getGender() == Gender.FEMALE) {
             return "Ms.";
         } else {
             return "Mx.";
