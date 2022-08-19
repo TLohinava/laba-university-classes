@@ -30,7 +30,7 @@ public class MainClass {
         Dean deanPed = new Dean("Zinaida", "Zinaidovna", Person.Gender.FEMALE);
         Dean deanDent = new Dean("Mikhail", "Mikhailov", Person.Gender.MALE);
         Dean deanPharm = new Dean("Zukhara", "Karimova", Person.Gender.FEMALE);
-        deanGM.setDrinkPreference(IDrink.Drinks.COFFEE);
+        deanGM.setDrinkPreference(Drinks.COFFEE);
 
         List<Employee> employeesGM = new ArrayList<>();
         employeesGM.add(deanGM);

@@ -8,7 +8,7 @@ public class Employee extends Person implements IDrink {
 
     private static final Logger LOGGER = LogManager.getLogger(Employee.class);
 
-    IDrink.Drinks drinkPreference;
+    Drinks drinkPreference;
 
     public Employee(String firstName, String surname, Gender gender) {
         super(firstName, surname, gender);
@@ -20,7 +20,7 @@ public class Employee extends Person implements IDrink {
     }
 
     @Override
-    public void think(IDrink.Drinks drink) {
+    public void think(Drinks drink) {
         LOGGER.info("It's time for a hot " + drink.getDrinkType() + "!");
     }
 
@@ -30,7 +30,7 @@ public class Employee extends Person implements IDrink {
     }
 
     @Override
-    public void brew(IDrink.Drinks drink) {
+    public void brew(Drinks drink) {
         switch (drink) {
             case TEA:
                 LOGGER.info("Wait 5 minutes for the " + drink.getDrinkType() + " to get ready.");
