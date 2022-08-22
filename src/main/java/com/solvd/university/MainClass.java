@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
 public class MainClass {
 
@@ -54,7 +53,7 @@ public class MainClass {
 
         Faculty generalMedicine = new Faculty("General Medicine", 1000);
         generalMedicine.setDean(deanGM);
-//        generalMedicine.setEmployees(employeesGM);
+        generalMedicine.setEmployees(employeesGM);
         generalMedicine.setCost(new BigDecimal(3000));
         generalMedicine.setYear(dateOfEst);
         Faculty pediatrics = new Faculty("Pediatrics", 3);
@@ -93,6 +92,7 @@ public class MainClass {
         alexAddress.setHouse(8);
 
         Passport alexPassport = new Passport("MP", 876543, alexAddress, LocalDate.of(2021, 3, 2));
+
         Consumer<Passport> passportConsumer = x -> LOGGER.info("Passport № " + x.getSerialNumber());
         passportConsumer.accept(alexPassport);
 
@@ -123,7 +123,7 @@ public class MainClass {
 
         Predicate<List<TestCertificate>> isPassed = x -> x.size() == 3;
         ICheck<List<TestCertificate>> isRelevant = cert -> cert.stream()
-                  .anyMatch(x -> x.getSubject() == "Biology" || x.getSubject() == "Chemistry");
+                .anyMatch(x -> x.getSubject() == "Biology" || x.getSubject() == "Chemistry");
         LOGGER.info(isRelevant.check(alexTestCerts));
 
         alex.setPassedTest(isPassed.test(alexTestCerts));
@@ -152,10 +152,6 @@ public class MainClass {
         currentApplications.add(ritaApplication);
         currentApplications.add(iraApplication);
         currentApplications.add(dimaApplication);
-
-        currentApplications.stream()
-                .filter(application -> application.getStatus() == Application.ApplicationStatus.WAITING)
-                .forEach(application -> application.setStatus(Application.ApplicationStatus.PROCESSED));
 
         PassbookEntry<Integer> alexPassbookHistory = new PassbookEntry<>("History", 9);
         PassbookEntry<String> alexPassbookPhilosophy = new PassbookEntry<>("Philosophy", "passed");
@@ -197,5 +193,19 @@ public class MainClass {
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
         }
+
+        bsmuFaculties.stream()
+                .flatMap(fc -> fc.getEmployees().stream())
+                .peek(LOGGER::info)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No employee found."));
+
+        currentApplications.stream()
+                .filter(application -> application.getStatus() == Application.ApplicationStatus.WAITING)
+                .forEach(application -> application.setStatus(Application.ApplicationStatus.PROCESSED));
+
+        List<Student> applicants = currentApplications.stream()
+                .map(Application::getStudent)
+                .collect(Collectors.toList());
     }
 }
