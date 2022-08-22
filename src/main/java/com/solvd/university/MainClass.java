@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
@@ -207,5 +208,21 @@ public class MainClass {
         List<Student> applicants = currentApplications.stream()
                 .map(Application::getStudent)
                 .collect(Collectors.toList());
+
+        try{
+            Class<Student> studentClass = (Class<Student>) Class.forName("com.solvd.university.people.Student");
+            Method[] m = studentClass.getDeclaredMethods();
+            for (Method method : m) {
+                LOGGER.info(method);
+            }
+            Constructor<Student> studentConstructor = studentClass.getDeclaredConstructor(String.class, String.class, Person.Gender.class);
+            Student feofan = studentConstructor.newInstance("Feofan", "Feofanov", Person.Gender.MALE);
+            Method greet = studentClass.getDeclaredMethod("greet");
+            greet.invoke(feofan);
+            Method pass = studentClass.getDeclaredMethod("setPassedTest", boolean.class);
+            pass.invoke(feofan, false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
