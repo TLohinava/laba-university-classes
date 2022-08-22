@@ -18,6 +18,7 @@ public class UniUtils {
     public static void getCheapest(University university) {
         BigDecimal min = new BigDecimal(10000);
         String fcName = "";
+
         for (Faculty fc : university.getFaculty()) {
             if (min.compareTo(fc.getCost()) >= 0) {
                 min = fc.getCost();
@@ -43,9 +44,7 @@ public class UniUtils {
     }
 
     public static void welcome(List<Employee> employees) {
-        for (Employee emp : employees) {
-            emp.greet();
-        }
+        employees.forEach(Employee::greet);
     }
 
     public static void drinkBreak(Employee employee) {

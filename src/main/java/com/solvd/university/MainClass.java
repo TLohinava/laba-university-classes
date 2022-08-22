@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
+import java.util.function.Predicate;
 
 public class MainClass {
 
@@ -41,10 +42,6 @@ public class MainClass {
         Student rita = new Student("Rita", "Avdeeva", Person.Gender.FEMALE);
         Student ira = new Student("Irina", "Udina", Person.Gender.FEMALE);
         Student dima = new Student("Dmitry", "Udin", Person.Gender.MALE);
-        alex.setPassedTest(true);
-        rita.setPassedTest(true);
-        ira.setPassedTest(true);
-        dima.setPassedTest(true);
 
         Secretary secretary = new Secretary("Alisa", "Alisovna", Person.Gender.FEMALE);
         secretary.work(employeesGM.get(1));
@@ -54,6 +51,7 @@ public class MainClass {
 
         Faculty generalMedicine = new Faculty("General Medicine", 1000);
         generalMedicine.setDean(deanGM);
+//        generalMedicine.setEmployees(employeesGM);
         generalMedicine.setCost(new BigDecimal(3000));
         generalMedicine.setYear(dateOfEst);
         Faculty pediatrics = new Faculty("Pediatrics", 3);
@@ -102,10 +100,25 @@ public class MainClass {
         TestCertificate alexCertChem = new TestCertificate(LocalDate.of(2022, 6, 20),
                 TestCertificate.calcCertScore(),
                 "Chemistry");
-        List<TestCertificate> alexTestCerts = new ArrayList<>();
-        alexTestCerts.add(alexCertBio);
-        alexTestCerts.add(alexCertBel);
-        alexTestCerts.add(alexCertChem);
+        List<TestCertificate> alexTestCerts = new ArrayList<>(List.of(alexCertBel, alexCertBio, alexCertChem));
+
+        TestCertificate ritaCertBio = new TestCertificate(LocalDate.of(2022, 6, 17),
+                TestCertificate.calcCertScore(),
+                "Biology");
+        TestCertificate ritaCertBel = new TestCertificate(LocalDate.of(2022, 6, 10),
+                TestCertificate.calcCertScore(),
+                "Belarusian");
+        TestCertificate ritaCertChem = new TestCertificate(LocalDate.of(2022, 6, 20),
+                TestCertificate.calcCertScore(),
+                "Chemistry");
+        List<TestCertificate> ritaTestCerts = new ArrayList<>(List.of(ritaCertBel, ritaCertBio, ritaCertChem));
+
+        Predicate<List<TestCertificate>> isPassed = x -> x.size() == 3;
+
+        alex.setPassedTest(isPassed.test(alexTestCerts));
+        rita.setPassedTest(isPassed.test(ritaTestCerts));
+        ira.setPassedTest(false);
+        dima.setPassedTest(true);
 
         SchoolCert alexSchoolCert = new SchoolCert(82);
 
@@ -113,19 +126,25 @@ public class MainClass {
         Application ritaApplication = new Application(rita, LocalDateTime.of(2022, 7, 15, 14, 22));
         Application iraApplication = new Application(ira, LocalDateTime.of(2022, 7, 15, 14, 22));
         Application dimaApplication = new Application(dima, LocalDateTime.of(2022, 7, 15, 14, 22));
-        int alexTotalScore = alexApplication.getTotalScore(alexTestCerts, alexSchoolCert);
+
+        alexApplication.setSchoolCert(alexSchoolCert);
+        alexApplication.setTestCertificates(alexTestCerts);
+        int alexTotalScore = alexApplication.getTotalScore();
+
         alexApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
-        ritaApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
-        iraApplication.setStatus(Application.ApplicationStatus.PROCESSED);
-        dimaApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
+        ritaApplication.setStatus(Application.ApplicationStatus.WAITING);
+        iraApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
+        dimaApplication.setStatus(Application.ApplicationStatus.WAITING);
         UniUtils.checkStatus(alexApplication);
-        List<Application.ApplicationStatus> currentApplications = new ArrayList<>();
-        currentApplications.add(alexApplication.getStatus());
-        currentApplications.add(ritaApplication.getStatus());
-        currentApplications.add(iraApplication.getStatus());
-        currentApplications.add(dimaApplication.getStatus());
-        Set<Application.ApplicationStatus> statusSet = new HashSet<>(currentApplications);
-        LOGGER.info(statusSet);
+        List<Application> currentApplications = new ArrayList<>();
+        currentApplications.add(alexApplication);
+        currentApplications.add(ritaApplication);
+        currentApplications.add(iraApplication);
+        currentApplications.add(dimaApplication);
+
+        currentApplications.stream()
+                .filter(application -> application.getStatus() == Application.ApplicationStatus.WAITING)
+                .forEach(application -> application.setStatus(Application.ApplicationStatus.PROCESSED));
 
         PassbookEntry<Integer> alexPassbookHistory = new PassbookEntry<>("History", 9);
         PassbookEntry<String> alexPassbookPhilosophy = new PassbookEntry<>("Philosophy", "passed");
@@ -141,9 +160,6 @@ public class MainClass {
         Inventory.printInventoryList(bsmu.getFaculty());
 
         UniUtils.chooseFaculty(pediatrics, alexApplication, alexTotalScore);
-        UniUtils.chooseFaculty(pediatrics, ritaApplication, 310);
-        UniUtils.chooseFaculty(pediatrics, iraApplication, 360);
-        UniUtils.chooseFaculty(pediatrics, dimaApplication, 356);
         UniUtils.getCheapest(bsmu);
         UniUtils.welcome(employeesGM);
         UniUtils.drinkBreak(deanGM);
@@ -152,16 +168,15 @@ public class MainClass {
         try {
             File text = new File("src/main/resources/textSample.txt");
             String content = FileUtils.readFileToString(text, "UTF-8");
-            content = StringUtils.lowerCase(content);
-            String[] contentArray = StringUtils.split(content);
+            List<String> contentArray = new ArrayList<>(List.of(StringUtils.split(content)));
             Map<String, Integer> wordsMap = new HashMap<>();
-            for (String word : contentArray) {
-                if (word.length() > 3 && StringUtils.isAlpha(word)) {
-                    if (wordsMap.containsKey(word)) continue;
-                    int num = StringUtils.countMatches(content, word);
-                    wordsMap.put(word, num);
-                }
-            }
+            contentArray.stream()
+                    .filter(word -> word.length() > 3 && StringUtils.isAlpha(word))
+                    .forEach(word -> {
+                        int num = StringUtils.countMatches(content, word);
+                        wordsMap.put(word, num);
+                    });
+
             Map<String, Integer> wordsSortedMap = new LinkedHashMap<>();
             wordsMap.entrySet()
                     .stream()

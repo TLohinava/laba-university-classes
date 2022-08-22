@@ -2,11 +2,8 @@ package com.solvd.university.doc;
 
 import com.solvd.university.exception.DateException;
 import com.solvd.university.people.Student;
-import com.solvd.university.people.staff.Employee;
 import com.solvd.university.people.staff.Rector;
 import com.solvd.university.structure.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.*;
 import java.util.*;
@@ -22,8 +19,6 @@ public class Application {
     private LocalDateTime applicationDateTime;
     private ApplicationStatus status;
 
-    private static final Logger LOGGER = LogManager.getLogger(Employee.class);
-
     public Application(Student student, LocalDateTime applicationDateTime) {
         this.student = student;
         this.applicationDateTime = applicationDateTime;
@@ -33,13 +28,20 @@ public class Application {
         SUBMITTED, WAITING, PROCESSED, REVIEWED, LOST
     }
 
-    public int getTotalScore(List<TestCertificate> testCertificates, SchoolCert schoolCert) {
-        for (TestCertificate cert : testCertificates) {
-            if (cert.getDateOfIssue().getYear() < LocalDate.now().getYear()) {
-                throw new DateException("Year is not valid");
-            }
+    public int getCertScore(List<TestCertificate> testCertificates) {
+        boolean isValid = testCertificates.stream()
+                .allMatch(cert -> cert.getDateOfIssue().getYear() == LocalDate.now().getYear());
+        if (isValid) {
+            return testCertificates.stream()
+                    .map(Certificate::getCertScore)
+                    .reduce(0, (a, b) -> a + b);
+        } else {
+            throw new DateException("Year of the test certificate is not valid");
         }
-        return testCertificates.get(0).getCertScore() + testCertificates.get(1).getCertScore() + testCertificates.get(2).getCertScore() + schoolCert.getCertScore();
+    }
+
+    public int getTotalScore() {
+        return this.getCertScore(this.getTestCertificates()) + this.getSchoolCert().getCertScore();
     }
 
     @Override
