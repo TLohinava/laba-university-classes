@@ -28,13 +28,16 @@ public class Application {
         SUBMITTED, WAITING, PROCESSED, REVIEWED, LOST
     }
 
+    ICount counter = Integer::sum;
+    IValidate<TestCertificate> validator = x -> x.getDateOfIssue().getYear() == LocalDate.now().getYear();
+
     public int getCertScore(List<TestCertificate> testCertificates) {
         boolean isValid = testCertificates.stream()
-                .allMatch(cert -> cert.getDateOfIssue().getYear() == LocalDate.now().getYear());
+                .allMatch(validator::isValid);
         if (isValid) {
             return testCertificates.stream()
                     .map(Certificate::getCertScore)
-                    .reduce(0, (a, b) -> a + b);
+                    .reduce(0, counter::count);
         } else {
             throw new DateException("Year of the test certificate is not valid");
         }

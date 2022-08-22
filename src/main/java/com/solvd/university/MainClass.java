@@ -1,6 +1,7 @@
 package com.solvd.university;
 
 import com.solvd.university.doc.*;
+import com.solvd.university.impl.ICheck;
 import com.solvd.university.people.Person;
 import com.solvd.university.people.staff.*;
 import com.solvd.university.structure.*;
@@ -17,7 +18,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class MainClass {
 
@@ -90,6 +93,11 @@ public class MainClass {
         alexAddress.setHouse(8);
 
         Passport alexPassport = new Passport("MP", 876543, alexAddress, LocalDate.of(2021, 3, 2));
+        Consumer<Passport> passportConsumer = x -> LOGGER.info("Passport № " + x.getSerialNumber());
+        passportConsumer.accept(alexPassport);
+
+        Supplier<LocalDateTime> timeSupplier = LocalDateTime::now;
+        timeSupplier.get();
 
         TestCertificate alexCertBio = new TestCertificate(LocalDate.of(2022, 6, 17),
                 TestCertificate.calcCertScore(),
@@ -114,6 +122,9 @@ public class MainClass {
         List<TestCertificate> ritaTestCerts = new ArrayList<>(List.of(ritaCertBel, ritaCertBio, ritaCertChem));
 
         Predicate<List<TestCertificate>> isPassed = x -> x.size() == 3;
+        ICheck<List<TestCertificate>> isRelevant = cert -> cert.stream()
+                  .anyMatch(x -> x.getSubject() == "Biology" || x.getSubject() == "Chemistry");
+        LOGGER.info(isRelevant.check(alexTestCerts));
 
         alex.setPassedTest(isPassed.test(alexTestCerts));
         rita.setPassedTest(isPassed.test(ritaTestCerts));

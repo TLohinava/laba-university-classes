@@ -1,6 +1,7 @@
 package com.solvd.university;
 
 import com.solvd.university.doc.Application;
+import com.solvd.university.impl.ICheck;
 import com.solvd.university.people.staff.*;
 import com.solvd.university.structure.*;
 
