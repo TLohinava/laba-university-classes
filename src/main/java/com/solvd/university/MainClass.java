@@ -195,7 +195,7 @@ public class MainClass {
             LOGGER.error(e.getMessage());
         }
 
-        bsmuFaculties.stream()
+        Employee firstEmployee = bsmuFaculties.stream()
                 .flatMap(fc -> fc.getEmployees().stream())
                 .peek(LOGGER::info)
                 .findFirst()
