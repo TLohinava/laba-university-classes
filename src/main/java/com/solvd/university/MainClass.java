@@ -124,7 +124,7 @@ public class MainClass {
 
         Predicate<List<TestCertificate>> isPassed = x -> x.size() == 3;
         ICheck<List<TestCertificate>> isRelevant = cert -> cert.stream()
-                .anyMatch(x -> x.getSubject() == "Biology" || x.getSubject() == "Chemistry");
+                .anyMatch(x -> x.getSubject().equals("Biology") || x.getSubject().equals("Chemistry"));
         LOGGER.info(isRelevant.check(alexTestCerts));
 
         alex.setPassedTest(isPassed.test(alexTestCerts));
