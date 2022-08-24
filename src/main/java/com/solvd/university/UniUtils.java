@@ -16,20 +16,24 @@ public class UniUtils {
     private static final Logger LOGGER = LogManager.getLogger(UniUtils.class);
 
     public static void getCheapest(University university) {
-        BigDecimal min = new BigDecimal(10000);
-        String fcName = "";
+        StringBuilder fcName = new StringBuilder();
 
-        for (Faculty fc : university.getFaculty()) {
-            if (min.compareTo(fc.getCost()) >= 0) {
-                min = fc.getCost();
-                if (fcName.isEmpty()) {
-                    fcName += fc.getFacultyName();
-                } else {
-                    fcName += " and " + fc.getFacultyName();
-                }
-            }
-        }
-        LOGGER.info("The lowest cost of studying is at " + fcName + " with " + min + "$ per year.");
+        Optional<BigDecimal> minCost = university.getFaculty().stream()
+                .map(Faculty::getCost)
+                .min(Comparator.naturalOrder());
+
+        Optional<StringBuilder> peekCost = university.getFaculty().stream()
+                .filter(fc -> minCost.get().compareTo(fc.getCost()) >= 0)
+                .map(fc -> {
+                    if (fcName.length() == 0) {
+                        return fcName.append(fc.getFacultyName());
+                    } else {
+                        return fcName.append(" and ")
+                                .append(fc.getFacultyName());
+                    }
+                })
+                .reduce((a, b) -> b);
+        LOGGER.info("The lowest cost of studying is at " + peekCost.get() + " with " + minCost.get() + "$ per year.");
     }
 
     public static void chooseFaculty(Faculty faculty, Application application, int total) {

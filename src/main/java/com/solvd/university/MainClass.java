@@ -196,6 +196,7 @@ public class MainClass {
         }
 
         Employee firstEmployee = bsmuFaculties.stream()
+                .filter(fc -> fc.getEmployees() != null)
                 .flatMap(fc -> fc.getEmployees().stream())
                 .peek(LOGGER::info)
                 .findFirst()
