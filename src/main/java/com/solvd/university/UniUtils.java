@@ -18,11 +18,12 @@ public class UniUtils {
     public static void getCheapest(University university) {
         StringBuilder fcName = new StringBuilder();
 
-        Optional<BigDecimal> minCost = university.getFaculty().stream()
+        Optional<BigDecimal> minCost = Optional.of(university.getFaculty().stream()
                 .map(Faculty::getCost)
-                .min(Comparator.naturalOrder());
+                .min(Comparator.naturalOrder())
+                .orElse(new BigDecimal(0)));
 
-        Optional<StringBuilder> peekCost = university.getFaculty().stream()
+        Optional<StringBuilder> peekCost = Optional.of(university.getFaculty().stream()
                 .filter(fc -> minCost.get().compareTo(fc.getCost()) >= 0)
                 .map(fc -> {
                     if (fcName.length() == 0) {
@@ -32,7 +33,8 @@ public class UniUtils {
                                 .append(fc.getFacultyName());
                     }
                 })
-                .reduce((a, b) -> b);
+                .reduce((a, b) -> b)
+                .orElseThrow(() -> new RuntimeException("No faculty available.")));
         LOGGER.info("The lowest cost of studying is at " + peekCost.get() + " with " + minCost.get() + "$ per year.");
     }
 
