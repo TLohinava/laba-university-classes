@@ -33,7 +33,7 @@ public class Faculty implements IAdmit {
 
     public void introduceFaculty() {
         LOGGER.info("Welcome to the faculty of " + getFacultyName() + ". Our year of establishment is " +
-                getYear() + ". Our is dean is called " + dean.getTitle(dean.getGender()) + dean.getFullName() + ". There are " +
+                getYear() + ". Our is dean is called " + dean.getTitle() + dean.getFullName() + ". There are " +
                 getStudentsCapacity() + " students studying at our faculty.");
     }
 

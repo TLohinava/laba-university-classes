@@ -28,10 +28,7 @@ public class Application {
         SUBMITTED, WAITING, PROCESSED, REVIEWED, LOST
     }
 
-    ICount counter = Integer::sum;
-    IValidate<TestCertificate> validator = x -> x.getDateOfIssue().getYear() == LocalDate.now().getYear();
-
-    public int getCertScore(List<TestCertificate> testCertificates) {
+    public int getCertScore(List<TestCertificate> testCertificates, ICount counter, IValidate<TestCertificate> validator) {
         boolean isValid = testCertificates.stream()
                 .allMatch(validator::isValid);
         if (isValid) {
@@ -41,10 +38,6 @@ public class Application {
         } else {
             throw new DateException("Year of the test certificate is not valid");
         }
-    }
-
-    public int getTotalScore() {
-        return this.getCertScore(this.getTestCertificates()) + this.getSchoolCert().getCertScore();
     }
 
     @Override

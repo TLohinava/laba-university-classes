@@ -13,6 +13,6 @@ public class Dean extends Professor {
 
     @Override
     public void greet() {
-        LOGGER.info("Hello students, my name is " + getTitle(getGender()) + " " + getFullName() + " and I am a dean. Nice to meet you!");
+        LOGGER.info("Hello students, my name is " + getTitle() + " " + getFullName() + " and I am a dean. Nice to meet you!");
     }
 }

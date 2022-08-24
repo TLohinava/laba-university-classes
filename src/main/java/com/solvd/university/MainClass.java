@@ -97,8 +97,7 @@ public class MainClass {
         Consumer<Passport> passportConsumer = x -> LOGGER.info("Passport № " + x.getSerialNumber());
         passportConsumer.accept(alexPassport);
 
-        Supplier<LocalDateTime> timeSupplier = LocalDateTime::now;
-        timeSupplier.get();
+        Supplier<Integer> dateSupplier = () -> LocalDate.now().getYear();
 
         TestCertificate alexCertBio = new TestCertificate(LocalDate.of(2022, 6, 17),
                 TestCertificate.calcCertScore(),
@@ -125,23 +124,27 @@ public class MainClass {
         Predicate<List<TestCertificate>> isPassed = x -> x.size() == 3;
         ICheck<List<TestCertificate>> isRelevant = cert -> cert.stream()
                 .anyMatch(x -> x.getSubject().equals("Biology") || x.getSubject().equals("Chemistry"));
-        LOGGER.info(isRelevant.check(alexTestCerts));
 
-        alex.setPassedTest(isPassed.test(alexTestCerts));
-        rita.setPassedTest(isPassed.test(ritaTestCerts));
+        alex.setPassedTest(isPassed.test(alexTestCerts) && isRelevant.check(alexTestCerts));
+        rita.setPassedTest(isPassed.test(ritaTestCerts) && isRelevant.check(ritaTestCerts));
         ira.setPassedTest(false);
         dima.setPassedTest(true);
 
         SchoolCert alexSchoolCert = new SchoolCert(82);
 
-        Application alexApplication = new Application(alex, LocalDateTime.of(2022, 7, 15, 14, 22));
-        Application ritaApplication = new Application(rita, LocalDateTime.of(2022, 7, 15, 14, 22));
-        Application iraApplication = new Application(ira, LocalDateTime.of(2022, 7, 15, 14, 22));
-        Application dimaApplication = new Application(dima, LocalDateTime.of(2022, 7, 15, 14, 22));
+        Application alexApplication = new Application(alex, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+        Application ritaApplication = new Application(rita, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+        Application iraApplication = new Application(ira, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+        Application dimaApplication = new Application(dima, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+
+        ICount scoreCounter = Integer::sum;
+        IValidate<TestCertificate> certValidator = x -> x.getDateOfIssue().getYear() == dateSupplier.get();
 
         alexApplication.setSchoolCert(alexSchoolCert);
         alexApplication.setTestCertificates(alexTestCerts);
-        int alexTotalScore = alexApplication.getTotalScore();
+
+        int alexCertScore = alexApplication.getCertScore(alexTestCerts, scoreCounter, certValidator);
+        int alexTotalScore = scoreCounter.count(alexCertScore, alexSchoolCert.getCertScore());
 
         alexApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
         ritaApplication.setStatus(Application.ApplicationStatus.WAITING);
@@ -203,14 +206,14 @@ public class MainClass {
                 .orElseThrow(() -> new RuntimeException("No employee found."));
 
         currentApplications.stream()
-                .filter(application -> application.getStatus() == Application.ApplicationStatus.WAITING)
+                .filter(application -> (Application.ApplicationStatus.WAITING).equals(application.getStatus()))
                 .forEach(application -> application.setStatus(Application.ApplicationStatus.PROCESSED));
 
         List<Student> applicants = currentApplications.stream()
                 .map(Application::getStudent)
                 .collect(Collectors.toList());
 
-        try{
+        try {
             Class<Student> studentClass = (Class<Student>) Class.forName("com.solvd.university.people.Student");
             Method[] m = studentClass.getDeclaredMethods();
             for (Method method : m) {
