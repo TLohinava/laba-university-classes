@@ -180,14 +180,10 @@ public class MainClass {
             File text = new File("src/main/resources/textSample.txt");
             String content = FileUtils.readFileToString(text, "UTF-8");
             List<String> contentArray = new ArrayList<>(List.of(StringUtils.split(content)));
-            Map<String, Integer> wordsMap = new HashMap<>();
-            contentArray.stream()
+            Map<String, Integer> wordsMap = contentArray.stream()
                     .filter(word -> word.length() > 3 && StringUtils.isAlpha(word))
-                    .forEach(word -> {
-                        int num = StringUtils.countMatches(content, word);
-                        wordsMap.put(word, num);
-                    });
-
+                    .collect(Collectors.toMap(word -> word, word -> StringUtils.countMatches(content, word), (a1, a2) -> a2));
+            LOGGER.info(wordsMap);
             Map<String, Integer> wordsSortedMap = new LinkedHashMap<>();
             wordsMap.entrySet()
                     .stream()
