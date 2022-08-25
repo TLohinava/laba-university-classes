@@ -182,14 +182,9 @@ public class MainClass {
             List<String> contentArray = new ArrayList<>(List.of(StringUtils.split(content)));
             Map<String, Integer> wordsMap = contentArray.stream()
                     .filter(word -> word.length() > 3 && StringUtils.isAlpha(word))
-                    .collect(Collectors.toMap(word -> word, word -> StringUtils.countMatches(content, word), (a1, a2) -> a2));
+                    .sorted(Comparator.comparing(word -> StringUtils.countMatches(content, word)))
+                    .collect(Collectors.toMap(word -> word, word -> StringUtils.countMatches(content, word), (a1, a2) -> a2, LinkedHashMap::new));
             LOGGER.info(wordsMap);
-            Map<String, Integer> wordsSortedMap = new LinkedHashMap<>();
-            wordsMap.entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue())
-                    .forEachOrdered(x -> wordsSortedMap.put(x.getKey(), x.getValue()));
-            LOGGER.info(wordsSortedMap);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
         }
