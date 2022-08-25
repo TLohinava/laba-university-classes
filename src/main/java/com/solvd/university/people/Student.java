@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 public class Student extends Person {
 
-    public boolean passedTest;
+    private boolean passedTest;
     private Passport passport;
     private Address address;
 
