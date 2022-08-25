@@ -21,10 +21,10 @@ public class Professor extends Employee implements IResearch {
         LOGGER.info("I have to write a review for this paper.");
     }
 
-    public String getTitle(Gender gender) {
-        if (getGender() == Gender.MALE) {
+    public String getTitle() {
+        if ((this.getGender()).equals(Gender.MALE)) {
             return "Mr.";
-        } else if (getGender() == Gender.FEMALE) {
+        } else if ((this.getGender()).equals(Gender.FEMALE)) {
             return "Ms.";
         } else {
             return "Mx.";

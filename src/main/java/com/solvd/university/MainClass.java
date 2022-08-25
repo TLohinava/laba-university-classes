@@ -1,6 +1,7 @@
 package com.solvd.university;
 
 import com.solvd.university.doc.*;
+import com.solvd.university.impl.ICheck;
 import com.solvd.university.people.Person;
 import com.solvd.university.people.staff.*;
 import com.solvd.university.structure.*;
@@ -14,9 +15,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
 public class MainClass {
 
@@ -41,10 +45,6 @@ public class MainClass {
         Student rita = new Student("Rita", "Avdeeva", Person.Gender.FEMALE);
         Student ira = new Student("Irina", "Udina", Person.Gender.FEMALE);
         Student dima = new Student("Dmitry", "Udin", Person.Gender.MALE);
-        alex.setPassedTest(true);
-        rita.setPassedTest(true);
-        ira.setPassedTest(true);
-        dima.setPassedTest(true);
 
         Secretary secretary = new Secretary("Alisa", "Alisovna", Person.Gender.FEMALE);
         secretary.work(employeesGM.get(1));
@@ -54,6 +54,7 @@ public class MainClass {
 
         Faculty generalMedicine = new Faculty("General Medicine", 1000);
         generalMedicine.setDean(deanGM);
+        generalMedicine.setEmployees(employeesGM);
         generalMedicine.setCost(new BigDecimal(3000));
         generalMedicine.setYear(dateOfEst);
         Faculty pediatrics = new Faculty("Pediatrics", 3);
@@ -93,6 +94,11 @@ public class MainClass {
 
         Passport alexPassport = new Passport("MP", 876543, alexAddress, LocalDate.of(2021, 3, 2));
 
+        Consumer<Passport> passportConsumer = x -> LOGGER.info("Passport № " + x.getSerialNumber());
+        passportConsumer.accept(alexPassport);
+
+        Supplier<Integer> dateSupplier = () -> LocalDate.now().getYear();
+
         TestCertificate alexCertBio = new TestCertificate(LocalDate.of(2022, 6, 17),
                 TestCertificate.calcCertScore(),
                 "Biology");
@@ -102,30 +108,54 @@ public class MainClass {
         TestCertificate alexCertChem = new TestCertificate(LocalDate.of(2022, 6, 20),
                 TestCertificate.calcCertScore(),
                 "Chemistry");
-        List<TestCertificate> alexTestCerts = new ArrayList<>();
-        alexTestCerts.add(alexCertBio);
-        alexTestCerts.add(alexCertBel);
-        alexTestCerts.add(alexCertChem);
+        List<TestCertificate> alexTestCerts = new ArrayList<>(List.of(alexCertBel, alexCertBio, alexCertChem));
+
+        TestCertificate ritaCertBio = new TestCertificate(LocalDate.of(2022, 6, 17),
+                TestCertificate.calcCertScore(),
+                "Biology");
+        TestCertificate ritaCertBel = new TestCertificate(LocalDate.of(2022, 6, 10),
+                TestCertificate.calcCertScore(),
+                "Belarusian");
+        TestCertificate ritaCertChem = new TestCertificate(LocalDate.of(2022, 6, 20),
+                TestCertificate.calcCertScore(),
+                "Chemistry");
+        List<TestCertificate> ritaTestCerts = new ArrayList<>(List.of(ritaCertBel, ritaCertBio, ritaCertChem));
+
+        Predicate<List<TestCertificate>> isPassed = x -> x.size() == 3;
+        ICheck<List<TestCertificate>> isRelevant = cert -> cert.stream()
+                .anyMatch(x -> x.getSubject().equals("Biology") || x.getSubject().equals("Chemistry"));
+
+        alex.setPassedTest(isPassed.test(alexTestCerts) && isRelevant.check(alexTestCerts));
+        rita.setPassedTest(isPassed.test(ritaTestCerts) && isRelevant.check(ritaTestCerts));
+        ira.setPassedTest(false);
+        dima.setPassedTest(true);
 
         SchoolCert alexSchoolCert = new SchoolCert(82);
 
-        Application alexApplication = new Application(alex, LocalDateTime.of(2022, 7, 15, 14, 22));
-        Application ritaApplication = new Application(rita, LocalDateTime.of(2022, 7, 15, 14, 22));
-        Application iraApplication = new Application(ira, LocalDateTime.of(2022, 7, 15, 14, 22));
-        Application dimaApplication = new Application(dima, LocalDateTime.of(2022, 7, 15, 14, 22));
-        int alexTotalScore = alexApplication.getTotalScore(alexTestCerts, alexSchoolCert);
+        Application alexApplication = new Application(alex, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+        Application ritaApplication = new Application(rita, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+        Application iraApplication = new Application(ira, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+        Application dimaApplication = new Application(dima, LocalDateTime.of(dateSupplier.get(), 7, 15, 14, 22));
+
+        ICount scoreCounter = Integer::sum;
+        IValidate<TestCertificate> certValidator = x -> x.getDateOfIssue().getYear() == dateSupplier.get();
+
+        alexApplication.setSchoolCert(alexSchoolCert);
+        alexApplication.setTestCertificates(alexTestCerts);
+
+        int alexCertScore = alexApplication.getCertScore(alexTestCerts, scoreCounter, certValidator);
+        int alexTotalScore = scoreCounter.count(alexCertScore, alexSchoolCert.getCertScore());
+
         alexApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
-        ritaApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
-        iraApplication.setStatus(Application.ApplicationStatus.PROCESSED);
-        dimaApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
+        ritaApplication.setStatus(Application.ApplicationStatus.WAITING);
+        iraApplication.setStatus(Application.ApplicationStatus.SUBMITTED);
+        dimaApplication.setStatus(Application.ApplicationStatus.WAITING);
         UniUtils.checkStatus(alexApplication);
-        List<Application.ApplicationStatus> currentApplications = new ArrayList<>();
-        currentApplications.add(alexApplication.getStatus());
-        currentApplications.add(ritaApplication.getStatus());
-        currentApplications.add(iraApplication.getStatus());
-        currentApplications.add(dimaApplication.getStatus());
-        Set<Application.ApplicationStatus> statusSet = new HashSet<>(currentApplications);
-        LOGGER.info(statusSet);
+        List<Application> currentApplications = new ArrayList<>();
+        currentApplications.add(alexApplication);
+        currentApplications.add(ritaApplication);
+        currentApplications.add(iraApplication);
+        currentApplications.add(dimaApplication);
 
         PassbookEntry<Integer> alexPassbookHistory = new PassbookEntry<>("History", 9);
         PassbookEntry<String> alexPassbookPhilosophy = new PassbookEntry<>("Philosophy", "passed");
@@ -141,9 +171,6 @@ public class MainClass {
         Inventory.printInventoryList(bsmu.getFaculty());
 
         UniUtils.chooseFaculty(pediatrics, alexApplication, alexTotalScore);
-        UniUtils.chooseFaculty(pediatrics, ritaApplication, 310);
-        UniUtils.chooseFaculty(pediatrics, iraApplication, 360);
-        UniUtils.chooseFaculty(pediatrics, dimaApplication, 356);
         UniUtils.getCheapest(bsmu);
         UniUtils.welcome(employeesGM);
         UniUtils.drinkBreak(deanGM);
@@ -152,24 +179,45 @@ public class MainClass {
         try {
             File text = new File("src/main/resources/textSample.txt");
             String content = FileUtils.readFileToString(text, "UTF-8");
-            content = StringUtils.lowerCase(content);
-            String[] contentArray = StringUtils.split(content);
-            Map<String, Integer> wordsMap = new HashMap<>();
-            for (String word : contentArray) {
-                if (word.length() > 3 && StringUtils.isAlpha(word)) {
-                    if (wordsMap.containsKey(word)) continue;
-                    int num = StringUtils.countMatches(content, word);
-                    wordsMap.put(word, num);
-                }
-            }
-            Map<String, Integer> wordsSortedMap = new LinkedHashMap<>();
-            wordsMap.entrySet()
-                    .stream()
-                    .sorted(Map.Entry.comparingByValue())
-                    .forEachOrdered(x -> wordsSortedMap.put(x.getKey(), x.getValue()));
-            LOGGER.info(wordsSortedMap);
+            List<String> contentArray = new ArrayList<>(List.of(StringUtils.split(content)));
+            Map<String, Integer> wordsMap = contentArray.stream()
+                    .filter(word -> word.length() > 3 && StringUtils.isAlpha(word))
+                    .sorted(Comparator.comparing(word -> StringUtils.countMatches(content, word)))
+                    .collect(Collectors.toMap(word -> word, word -> StringUtils.countMatches(content, word), (a1, a2) -> a2, LinkedHashMap::new));
+            LOGGER.info(wordsMap);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
+        }
+
+        Employee firstEmployee = bsmuFaculties.stream()
+                .filter(fc -> fc.getEmployees() != null)
+                .flatMap(fc -> fc.getEmployees().stream())
+                .peek(LOGGER::info)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No employee found."));
+
+        currentApplications.stream()
+                .filter(application -> (Application.ApplicationStatus.WAITING).equals(application.getStatus()))
+                .forEach(application -> application.setStatus(Application.ApplicationStatus.PROCESSED));
+
+        List<Student> applicants = currentApplications.stream()
+                .map(Application::getStudent)
+                .collect(Collectors.toList());
+
+        try {
+            Class<Student> studentClass = (Class<Student>) Class.forName("com.solvd.university.people.Student");
+            Method[] m = studentClass.getDeclaredMethods();
+            for (Method method : m) {
+                LOGGER.info(method);
+            }
+            Constructor<Student> studentConstructor = studentClass.getDeclaredConstructor(String.class, String.class, Person.Gender.class);
+            Student feofan = studentConstructor.newInstance("Feofan", "Feofanov", Person.Gender.MALE);
+            Method greet = studentClass.getDeclaredMethod("greet");
+            greet.invoke(feofan);
+            Method pass = studentClass.getDeclaredMethod("setPassedTest", boolean.class);
+            pass.invoke(feofan, false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

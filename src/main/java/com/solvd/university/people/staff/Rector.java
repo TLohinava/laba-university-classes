@@ -19,7 +19,7 @@ public class Rector extends Professor {
 
     @Override
     public void greet() {
-        LOGGER.info("Hello students, I am " + getTitle(getGender()) + " " + getFullName() + " and I have been a rector for " + getYearsInOffice() + " years. Nice to meet you!");
+        LOGGER.info("Hello students, I am " + getTitle() + " " + getFullName() + " and I have been a rector for " + getYearsInOffice() + " years. Nice to meet you!");
     }
 
     public LocalDate getStart() {
