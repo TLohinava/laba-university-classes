@@ -8,6 +8,8 @@ import com.solvd.university.structure.*;
 import com.solvd.university.people.Student;
 import com.solvd.university.exception.DataInvalidException;
 
+import com.solvd.university.threads.Connection;
+import com.solvd.university.threads.ConnectionPool;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -164,17 +166,7 @@ public class MainClass {
             List<PassbookEntry<?>> alexPassbook = new ArrayList<>();
             alexPassbook.add(alexPassbookHistory);
             alexPassbook.add(alexPassbookPhilosophy);
-            LOGGER.info(alexPassbook);
         }
-
-        Inventory.printInventoryList(alexTestCerts);
-        Inventory.printInventoryList(bsmu.getFaculty());
-
-        UniUtils.chooseFaculty(pediatrics, alexApplication, alexTotalScore);
-        UniUtils.getCheapest(bsmu);
-        UniUtils.welcome(employeesGM);
-        UniUtils.drinkBreak(deanGM);
-        UniUtils.checkSchedule(secretary, LocalTime.of(12, 30));
 
         try {
             File text = new File("src/main/resources/textSample.txt");
@@ -184,7 +176,6 @@ public class MainClass {
                     .filter(word -> word.length() > 3 && StringUtils.isAlpha(word))
                     .sorted(Comparator.comparing(word -> StringUtils.countMatches(content, word)))
                     .collect(Collectors.toMap(word -> word, word -> StringUtils.countMatches(content, word), (a1, a2) -> a2, LinkedHashMap::new));
-            LOGGER.info(wordsMap);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
         }
@@ -206,10 +197,7 @@ public class MainClass {
 
         try {
             Class<Student> studentClass = (Class<Student>) Class.forName("com.solvd.university.people.Student");
-            Method[] m = studentClass.getDeclaredMethods();
-            for (Method method : m) {
-                LOGGER.info(method);
-            }
+
             Constructor<Student> studentConstructor = studentClass.getDeclaredConstructor(String.class, String.class, Person.Gender.class);
             Student feofan = studentConstructor.newInstance("Feofan", "Feofanov", Person.Gender.MALE);
             Method greet = studentClass.getDeclaredMethod("greet");
@@ -218,6 +206,17 @@ public class MainClass {
             pass.invoke(feofan, false);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+
+        Connection conn = null;
+
+        ConnectionPool pool = ConnectionPool.getInstance();
+        try {
+            conn = pool.getConnection();
+        } finally {
+            if (conn != null) {
+                pool.releaseConnection(conn);
+            }
         }
     }
 }
