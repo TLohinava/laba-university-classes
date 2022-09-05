@@ -21,12 +21,17 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
 public class MainClass {
 
     private static final Logger LOGGER = LogManager.getLogger(MainClass.class);
+
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(5);
 
     public static void main(String[] args) {
         Rector rector = new Rector("Alexey", "Mikhailov", Person.Gender.MALE);
@@ -209,7 +214,6 @@ public class MainClass {
         }
 
         Connection conn = null;
-
         ConnectionPool pool = ConnectionPool.getInstance();
         try {
             conn = pool.getConnection();
@@ -218,5 +222,17 @@ public class MainClass {
                 pool.releaseConnection(conn);
             }
         }
+
+        CompletableFuture<String> asyncHello1 = CompletableFuture.supplyAsync(() -> "World1", EXECUTOR_SERVICE);
+        CompletableFuture<String> asyncHello2 = CompletableFuture.supplyAsync(() -> "World2", EXECUTOR_SERVICE);
+        CompletableFuture<String> asyncHello3 = CompletableFuture.supplyAsync(() -> "World3", EXECUTOR_SERVICE);
+        CompletableFuture<String> asyncHello4 = CompletableFuture.supplyAsync(() -> "World4", EXECUTOR_SERVICE);
+        List<CompletableFuture<String>> list = Arrays.asList(asyncHello1, asyncHello2, asyncHello3, asyncHello4);
+
+        EXECUTOR_SERVICE.execute(() -> {
+            list.forEach(i -> list.set(list.indexOf(i), i.thenApply(n -> "Hello " + n)));
+            list.forEach(i -> LOGGER.info(i.join()));
+        });
+        EXECUTOR_SERVICE.shutdown();
     }
 }
