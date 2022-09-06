@@ -215,11 +215,18 @@ public class MainClass {
 
         Connection conn = null;
         ConnectionPool pool = ConnectionPool.getInstance();
-        try {
-            conn = pool.getConnection();
-        } finally {
-            if (conn != null) {
-                pool.releaseConnection(conn);
+
+        for (int i = 0; i < 10; i++) {
+            try {
+                conn = pool.getConnection();
+                System.out.println(conn);
+                Thread.sleep(200);
+            }catch (InterruptedException e) {
+                LOGGER.error(e);
+            } finally {
+                if (conn != null) {
+                    pool.releaseConnection(conn);
+                }
             }
         }
 
