@@ -213,33 +213,43 @@ public class MainClass {
             throw new RuntimeException(e);
         }
 
-        Connection conn = null;
-        ConnectionPool pool = ConnectionPool.getInstance();
+//        Connection conn = null;
+//        ConnectionPool pool = ConnectionPool.getInstance();
+//
+//        for (int i = 0; i < 10; i++) {
+//            try {
+//                conn = pool.getConnection();
+//                System.out.println(conn);
+//                Thread.sleep(200);
+//            }catch (InterruptedException e) {
+//                LOGGER.error(e);
+//            } finally {
+//                if (conn != null) {
+//                    pool.releaseConnection(conn);
+//                }
+//            }
+//        }
 
-        for (int i = 0; i < 10; i++) {
-            try {
-                conn = pool.getConnection();
-                System.out.println(conn);
-                Thread.sleep(200);
-            }catch (InterruptedException e) {
-                LOGGER.error(e);
-            } finally {
-                if (conn != null) {
-                    pool.releaseConnection(conn);
-                }
-            }
-        }
-
+        Connection connection = new Connection();
         CompletableFuture<String> asyncHello1 = CompletableFuture.supplyAsync(() -> "World1", EXECUTOR_SERVICE);
         CompletableFuture<String> asyncHello2 = CompletableFuture.supplyAsync(() -> "World2", EXECUTOR_SERVICE);
         CompletableFuture<String> asyncHello3 = CompletableFuture.supplyAsync(() -> "World3", EXECUTOR_SERVICE);
         CompletableFuture<String> asyncHello4 = CompletableFuture.supplyAsync(() -> "World4", EXECUTOR_SERVICE);
         List<CompletableFuture<String>> list = Arrays.asList(asyncHello1, asyncHello2, asyncHello3, asyncHello4);
 
+        CompletableFuture<Void> asyncC = CompletableFuture.runAsync(connection::create, EXECUTOR_SERVICE);
+        CompletableFuture<Void> asyncR = CompletableFuture.runAsync(connection::read, EXECUTOR_SERVICE);
+        CompletableFuture<Void> asyncU = CompletableFuture.runAsync(connection::update, EXECUTOR_SERVICE);
+        CompletableFuture<Void> asyncD = CompletableFuture.runAsync(connection::delete, EXECUTOR_SERVICE);
+
         EXECUTOR_SERVICE.execute(() -> {
-            list.forEach(i -> list.set(list.indexOf(i), i.thenApply(n -> "Hello " + n)));
-            list.forEach(i -> LOGGER.info(i.join()));
+            if(asyncHello1.isDone()) {
+                list.forEach(i -> list.set(list.indexOf(i), i.thenApplyAsync(n -> "Hello " + n)));
+                list.forEach(i -> LOGGER.info(i.join()));
+            }
         });
+
+        CompletableFuture<Void> exec = CompletableFuture.allOf(asyncC, asyncR, asyncU, asyncD).thenRunAsync(() -> LOGGER.info("Execution completed"));
         EXECUTOR_SERVICE.shutdown();
     }
 }
