@@ -3,18 +3,9 @@ package com.solvd.university.threads;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Connection extends Thread {
+public class Connection {
 
     private static final Logger LOGGER = LogManager.getLogger(Connection.class);
-
-    @Override
-    public void run() {
-        create();
-        read();
-        update();
-        delete();
-        repeat();
-    }
 
     public void create() {
         LOGGER.info(1);
