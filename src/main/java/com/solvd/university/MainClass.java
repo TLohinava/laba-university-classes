@@ -220,7 +220,7 @@ public class MainClass {
                 Connection conn = pool.getConnection();
                 conn.create();
                 pool.releaseConnection(conn);
-            }).start();
+             }).start();
         }
 
         CompletableFuture<String> asyncHello1 = CompletableFuture.supplyAsync(alex::getFirstName, EXECUTOR_SERVICE);
