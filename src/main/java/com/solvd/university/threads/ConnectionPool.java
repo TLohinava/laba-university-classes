@@ -1,36 +1,49 @@
 package com.solvd.university.threads;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConnectionPool {
 
     private static ConnectionPool INSTANCE;
-    private final List<Connection> connections;
+    private final BlockingQueue<Connection> connections;
     private Connection connection;
-    private static int POOL_SIZE;
+    private final AtomicInteger connCount;
 
-    private ConnectionPool() {
-        POOL_SIZE = 5;
-        connections = new ArrayList<>(POOL_SIZE);
-        for (int i = 0; i < POOL_SIZE; i++) {
+    private ConnectionPool(int poolSize) {
+        connections = new LinkedBlockingQueue<>(poolSize);
+        connCount = new AtomicInteger();
+        for (int i = 0; i < poolSize; i++) {
             connection = new Connection();
             connections.add(connection);
         }
     }
 
     public synchronized Connection getConnection() {
-        connection = connections.remove(connections.size() - 1);
-        return connection;
+        try {
+            connection = connections.poll(10, TimeUnit.MILLISECONDS);
+            if (connection == null) {
+                if (connCount.get() < connections.size()) {
+                    connection = new Connection();
+                    connCount.incrementAndGet();
+                }
+                connection = connections.take();
+            }
+            return connection;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void releaseConnection(Connection connection) {
-        connections.add(connection);
+        connections.offer(connection);
     }
 
-    public static ConnectionPool getInstance() {
+    public static ConnectionPool getInstance(int poolSize) {
         if (INSTANCE == null) {
-            INSTANCE = new ConnectionPool();
+            INSTANCE = new ConnectionPool(poolSize);
         }
         return INSTANCE;
     }

@@ -8,6 +8,11 @@ public class Connection {
     private static final Logger LOGGER = LogManager.getLogger(Connection.class);
 
     public void create() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         LOGGER.info(1);
     }
 

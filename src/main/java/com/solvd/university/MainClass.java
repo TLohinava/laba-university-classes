@@ -213,19 +213,14 @@ public class MainClass {
             throw new RuntimeException(e);
         }
 
-        ConnectionPool pool = ConnectionPool.getInstance();
+        ConnectionPool pool = ConnectionPool.getInstance(5);
 
-        try {
-            for (int i = 0; i < 10; i++) {
-                new Thread(() -> {
-                    Connection conn = pool.getConnection();
-                    conn.create();
-                    pool.releaseConnection(conn);
-                }).start();
-                Thread.sleep(500);
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error(e);
+        for (int i = 0; i < 50; i++) {
+            new Thread(() -> {
+                Connection conn = pool.getConnection();
+                conn.create();
+                pool.releaseConnection(conn);
+            }).start();
         }
 
         CompletableFuture<String> asyncHello1 = CompletableFuture.supplyAsync(alex::getFirstName, EXECUTOR_SERVICE);
@@ -247,7 +242,8 @@ public class MainClass {
         CompletableFuture<Void> asyncU = CompletableFuture.runAsync(connection::update, EXECUTOR_SERVICE);
         CompletableFuture<Void> asyncD = CompletableFuture.runAsync(connection::delete, EXECUTOR_SERVICE);
 
-        CompletableFuture<Void> exec = CompletableFuture.allOf(asyncC, asyncR, asyncU, asyncD).thenRunAsync(() -> LOGGER.info("Execution completed"));
+        CompletableFuture<Void> exec = CompletableFuture.allOf(asyncC, asyncR, asyncU, asyncD)
+                .thenRunAsync(() -> LOGGER.info("Execution completed"));
         EXECUTOR_SERVICE.shutdown();
     }
 }
