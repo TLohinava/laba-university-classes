@@ -8,6 +8,8 @@ import com.solvd.university.structure.*;
 import com.solvd.university.people.Student;
 import com.solvd.university.exception.DataInvalidException;
 
+import com.solvd.university.threads.Connection;
+import com.solvd.university.threads.ConnectionPool;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -19,12 +21,17 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
 public class MainClass {
 
     private static final Logger LOGGER = LogManager.getLogger(MainClass.class);
+
+    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(5);
 
     public static void main(String[] args) {
         Rector rector = new Rector("Alexey", "Mikhailov", Person.Gender.MALE);
@@ -164,17 +171,7 @@ public class MainClass {
             List<PassbookEntry<?>> alexPassbook = new ArrayList<>();
             alexPassbook.add(alexPassbookHistory);
             alexPassbook.add(alexPassbookPhilosophy);
-            LOGGER.info(alexPassbook);
         }
-
-        Inventory.printInventoryList(alexTestCerts);
-        Inventory.printInventoryList(bsmu.getFaculty());
-
-        UniUtils.chooseFaculty(pediatrics, alexApplication, alexTotalScore);
-        UniUtils.getCheapest(bsmu);
-        UniUtils.welcome(employeesGM);
-        UniUtils.drinkBreak(deanGM);
-        UniUtils.checkSchedule(secretary, LocalTime.of(12, 30));
 
         try {
             File text = new File("src/main/resources/textSample.txt");
@@ -184,7 +181,6 @@ public class MainClass {
                     .filter(word -> word.length() > 3 && StringUtils.isAlpha(word))
                     .sorted(Comparator.comparing(word -> StringUtils.countMatches(content, word)))
                     .collect(Collectors.toMap(word -> word, word -> StringUtils.countMatches(content, word), (a1, a2) -> a2, LinkedHashMap::new));
-            LOGGER.info(wordsMap);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
         }
@@ -206,10 +202,7 @@ public class MainClass {
 
         try {
             Class<Student> studentClass = (Class<Student>) Class.forName("com.solvd.university.people.Student");
-            Method[] m = studentClass.getDeclaredMethods();
-            for (Method method : m) {
-                LOGGER.info(method);
-            }
+
             Constructor<Student> studentConstructor = studentClass.getDeclaredConstructor(String.class, String.class, Person.Gender.class);
             Student feofan = studentConstructor.newInstance("Feofan", "Feofanov", Person.Gender.MALE);
             Method greet = studentClass.getDeclaredMethod("greet");
@@ -219,5 +212,38 @@ public class MainClass {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        ConnectionPool pool = ConnectionPool.getInstance(5);
+
+        for (int i = 0; i < 50; i++) {
+            new Thread(() -> {
+                Connection conn = pool.getConnection();
+                conn.create();
+                pool.releaseConnection(conn);
+             }).start();
+        }
+
+        CompletableFuture<String> asyncHello1 = CompletableFuture.supplyAsync(alex::getFirstName, EXECUTOR_SERVICE);
+        CompletableFuture<String> asyncHello2 = CompletableFuture.supplyAsync(rita::getFirstName, EXECUTOR_SERVICE);
+        CompletableFuture<String> asyncHello3 = CompletableFuture.supplyAsync(ira::getFirstName, EXECUTOR_SERVICE);
+        CompletableFuture<String> asyncHello4 = CompletableFuture.supplyAsync(dima::getFirstName, EXECUTOR_SERVICE);
+        List<CompletableFuture<String>> list = Arrays.asList(asyncHello1, asyncHello2, asyncHello3, asyncHello4);
+
+        EXECUTOR_SERVICE.execute(() -> {
+            if(asyncHello1.isDone()) {
+                list.forEach(i -> list.set(list.indexOf(i), i.thenApplyAsync(n -> "Hello " + n)));
+                list.forEach(i -> LOGGER.info(i.join()));
+            }
+        });
+
+        Connection connection = new Connection();
+        CompletableFuture<Void> asyncC = CompletableFuture.runAsync(connection::create, EXECUTOR_SERVICE);
+        CompletableFuture<Void> asyncR = CompletableFuture.runAsync(connection::read, EXECUTOR_SERVICE);
+        CompletableFuture<Void> asyncU = CompletableFuture.runAsync(connection::update, EXECUTOR_SERVICE);
+        CompletableFuture<Void> asyncD = CompletableFuture.runAsync(connection::delete, EXECUTOR_SERVICE);
+
+        CompletableFuture<Void> exec = CompletableFuture.allOf(asyncC, asyncR, asyncU, asyncD)
+                .thenRunAsync(() -> LOGGER.info("Execution completed"));
+        EXECUTOR_SERVICE.shutdown();
     }
 }
